@@ -132,7 +132,7 @@ namespace GeneticAlgorithmMultiThread
                 List<string> newPopulation = new List<string>();
 
                 // Create a new population by selecting, crossing over, and mutating individuals
-                for (int j = 0; j < populationSize / 2; j++)
+                for (int i = 0; i < populationSize / 2; i++)
                 {
                     string parent1 = Selection(population);
                     string parent2 = Selection(population);

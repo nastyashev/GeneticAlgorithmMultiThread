@@ -24,6 +24,7 @@ namespace GeneticAlgorithmMultiThread
             // Run the genetic algorithm
             RunAlgorithm(geneticAlgorithm, population);
             Console.WriteLine("-------------------------------------------------");
+            RunAlgorithm(geneticAlgorithmParallel, population);
         }
 
         static void RunAlgorithm(IGeneticAlgorithm geneticAlgorithm, List<string> population)
