@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace GeneticAlgorithmMultiThread.Sequential
 {
-    // sequentual implementation of the genetic algorithm
+    // Sequentual implementation of the genetic algorithm
     internal class GeneticAlgorithm
     {
-        private int populationSize;
-        private double mutationRate;
-        private int genomeLength;
-        private Random random;
+        protected int populationSize;
+        protected double mutationRate;
+        protected int genomeLength;
+        protected Random random;
 
         public GeneticAlgorithm(int populationSize, double mutationRate, int genomeLength)
         {
@@ -23,7 +23,7 @@ namespace GeneticAlgorithmMultiThread.Sequential
         }
 
         // Initialize population with random genomes
-        private List<string> InitializePopulation()
+        public List<string> InitializePopulation()
         {
             List<string> population = new List<string>();
 
@@ -36,7 +36,7 @@ namespace GeneticAlgorithmMultiThread.Sequential
         }
 
         // Generate a random genome of given length
-        private string GenerateRandomGenome()
+        protected string GenerateRandomGenome()
         {
             StringBuilder genome = new StringBuilder();
 
@@ -49,7 +49,7 @@ namespace GeneticAlgorithmMultiThread.Sequential
         }
 
         // Selection process
-        private string Selection(List<string> population)
+        protected string Selection(List<string> population)
         {
             int tournamentSize = 5; // Define the tournament size
             List<string> tournament = new List<string>();
@@ -79,7 +79,7 @@ namespace GeneticAlgorithmMultiThread.Sequential
         }
 
         // Crossover process
-        private (string, string) Crossover(string parent1, string parent2)
+        protected (string, string) Crossover(string parent1, string parent2)
         {
             // Choose a random crossover point
             int crossoverPoint = random.Next(genomeLength);
@@ -92,7 +92,7 @@ namespace GeneticAlgorithmMultiThread.Sequential
         }
 
         // Mutation process
-        private string Mutation(string genome)
+        protected string Mutation(string genome)
         {
             StringBuilder mutatedGenome = new StringBuilder(genome);
 
@@ -109,7 +109,7 @@ namespace GeneticAlgorithmMultiThread.Sequential
         }
 
         // Fitness calculation
-        private double CalculateFitness(string genome)
+        protected double CalculateFitness(string genome)
         {
             // Count the number of 1s in the genome
             int count = genome.Count(c => c == '1');
@@ -118,14 +118,20 @@ namespace GeneticAlgorithmMultiThread.Sequential
         }
 
         // Run the genetic algorithm
-        public string Run(int generations)
+        public virtual void Run(List<string> population)
         {
-            List<string> population = InitializePopulation();
+            // Find the fittest individual in the initial population
+            string fittest = population[0];
+            double maxFitness = CalculateFitness(fittest);
+            // counter for the number of generations
+            int generation = 0;
 
-            for (int i = 0; i < generations; i++)
+            // Run the genetic algorithm until the fittest individual has the maximum fitness
+            while (maxFitness < genomeLength)
             {
                 List<string> newPopulation = new List<string>();
 
+                // Create a new population by selecting, crossing over, and mutating individuals
                 for (int j = 0; j < populationSize / 2; j++)
                 {
                     string parent1 = Selection(population);
@@ -141,23 +147,23 @@ namespace GeneticAlgorithmMultiThread.Sequential
                 }
 
                 population = newPopulation;
-            }
 
-            // Select the fittest individual from the final population
-            string fittest = population[0];
-            double maxFitness = CalculateFitness(fittest);
-
-            for (int i = 1; i < populationSize; i++)
-            {
-                double fitness = CalculateFitness(population[i]);
-                if (fitness > maxFitness)
+                // Find the fittest individual in the new population
+                for (int i = 1; i < populationSize; i++)
                 {
-                    fittest = population[i];
-                    maxFitness = fitness;
+                    double fitness = CalculateFitness(population[i]);
+                    if (fitness > maxFitness)
+                    {
+                        fittest = population[i];
+                        maxFitness = fitness;
+                    }
                 }
+
+                generation++;
             }
 
-            return fittest;
+            Console.WriteLine("Generation: " + generation);
+            Console.WriteLine("Fittest genome: " + fittest);
         }
     }
 }
