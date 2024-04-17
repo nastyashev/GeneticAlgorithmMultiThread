@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeneticAlgorithmMultiThread.Sequential
+namespace GeneticAlgorithmMultiThread
 {
     // Sequentual implementation of the genetic algorithm
-    internal class GeneticAlgorithm
+    internal class GeneticAlgorithm : IGeneticAlgorithm
     {
         protected int populationSize;
         protected double mutationRate;
@@ -121,8 +121,8 @@ namespace GeneticAlgorithmMultiThread.Sequential
         public virtual void Run(List<string> population)
         {
             // Find the fittest individual in the initial population
-            string fittest = population[0];
-            double maxFitness = CalculateFitness(fittest);
+            //string fittest = population[0];
+            double maxFitness = CalculateFitness(population[0]);
             // counter for the number of generations
             int generation = 0;
 
@@ -154,7 +154,7 @@ namespace GeneticAlgorithmMultiThread.Sequential
                     double fitness = CalculateFitness(population[i]);
                     if (fitness > maxFitness)
                     {
-                        fittest = population[i];
+                        //fittest = population[i];
                         maxFitness = fitness;
                     }
                 }
@@ -162,8 +162,8 @@ namespace GeneticAlgorithmMultiThread.Sequential
                 generation++;
             }
 
-            Console.WriteLine("Generation: " + generation);
-            Console.WriteLine("Fittest genome: " + fittest);
+            /*Console.WriteLine("Generation: " + generation);
+            Console.WriteLine("Fittest genome: " + fittest);*/
         }
     }
 }

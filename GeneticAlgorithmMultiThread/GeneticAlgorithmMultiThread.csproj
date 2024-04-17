@@ -43,10 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Parallel\GeneticAlgorithmParallel.cs" />
+    <Compile Include="GeneticAlgorithmParallel.cs" />
+    <Compile Include="IGeneticAlgorithm.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sequential\GeneticAlgorithm.cs" />
+    <Compile Include="GeneticAlgorithm.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

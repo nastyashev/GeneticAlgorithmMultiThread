@@ -1,11 +1,10 @@
-﻿using GeneticAlgorithmMultiThread.Sequential;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeneticAlgorithmMultiThread.Parallel
+namespace GeneticAlgorithmMultiThread
 {
     // Parallel implementation of the genetic algorithm
     internal class GeneticAlgorithmParallel : GeneticAlgorithm
@@ -13,7 +12,6 @@ namespace GeneticAlgorithmMultiThread.Parallel
         public GeneticAlgorithmParallel(int populationSize, double mutationRate, int genomeLength) : base(populationSize, mutationRate, genomeLength)
         {
         }
-
 
 
     }
