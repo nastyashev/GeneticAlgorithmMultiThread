@@ -16,45 +16,34 @@ namespace GeneticAlgorithmMultiThread
 
         public override void Run(List<string> initialPopulation)
         {
-            // Number of populations
-            int numPopulations = 4;
+            // Number of populations to create in parallel
+            int numPopulations = Environment.ProcessorCount;
 
-            int populationSize = initialPopulation.Count / numPopulations;
+            int size = initialPopulation.Count / numPopulations;
             int remainder = initialPopulation.Count % numPopulations;
 
-            // Create multiple populations from the initial population
-            List<List<string>> populations = new List<List<string>>();
-            int currentIndex = 0;
+            // Split the initial population into multiple sub-populations
+            List<List<string>> subPopulations = new List<List<string>>();
             for (int i = 0; i < numPopulations; i++)
             {
-                int currentPopulationSize = populationSize + (i < remainder ? 1 : 0);
-                List<string> population = initialPopulation.Skip(currentIndex).Take(currentPopulationSize).ToList();
-                populations.Add(population);
-                currentIndex += currentPopulationSize;
+                //subPopulations.Add(initialPopulation.Skip(i * initialPopulation.Count / numPopulations).Take(initialPopulation.Count / numPopulations).ToList());
+                int start = i * size;
+                int end = (i == numPopulations - 1) ? start + size + remainder : start + size;
+                subPopulations.Add(initialPopulation.GetRange(start, end - start));
             }
 
-            // List to store the fittest individual from each population
-            List<string> fittestIndividuals = new List<string>();
-            List<double> maxFitnesses = new List<double>();
-
-            // Initialize the lists
-            for (int i = 0; i < numPopulations; i++)
+            // Create and evolve populations in parallel
+            List<string> bestIndividuals = new List<string>(new string[numPopulations]);
+            Parallel.For(0, numPopulations, i =>
             {
-                fittestIndividuals.Add(populations[i][0]);
-                maxFitnesses.Add(CalculateFitness(populations[i][0]));
-            }
+                List<string> population = subPopulations[i];
+                double maxFitness = CalculateFitness(population[0]);
 
-            // Run the genetic algorithm until the fittest individual has the maximum fitness
-            while (maxFitnesses.Max() < genomeLength)
-            {
-                // Use a parallel for loop to process each population in parallel
-                Parallel.For(0, numPopulations, i =>
+                while (maxFitness < genomeLength)
                 {
-                    List<string> population = populations[i];
                     List<string> newPopulation = new List<string>();
 
-                    // Process the population
-                    for (int j = 0; j < population.Count; j++)
+                    for (int j = 0; j < populationSize / 2; j++)
                     {
                         string parent1 = Selection(population);
                         string parent2 = Selection(population);
@@ -64,36 +53,29 @@ namespace GeneticAlgorithmMultiThread
                         child1 = Mutation(child1);
                         child2 = Mutation(child2);
 
-                        // Add the new individual to the new population
-                        lock (newPopulation)
-                        {
-                            newPopulation.Add(child1);
-                        }
+                        newPopulation.Add(child1);
+                        newPopulation.Add(child2);
                     }
 
-                    populations[i] = newPopulation;
+                    population = newPopulation;
 
-                    // Find the fittest individual in the new population
-                    for (int j = 0; j < population.Count; j++)
+                    for (int j = 1; j < populationSize; j++)
                     {
                         double fitness = CalculateFitness(population[j]);
-                        if (fitness > maxFitnesses[i])
+                        if (fitness > maxFitness)
                         {
-                            lock (this)
-                            {
-                                if (fitness > maxFitnesses[i])
-                                {
-                                    fittestIndividuals[i] = population[j];
-                                    maxFitnesses[i] = fitness;
-                                }
-                            }
+                            maxFitness = fitness;
                         }
                     }
-                });
-            }
-            // Find the fittest individual among the fittest individuals
-            int fittestIndex = maxFitnesses.IndexOf(maxFitnesses.Max());
-            Console.WriteLine("Fittest genome: " + fittestIndividuals[fittestIndex]);
+                }
+
+                string bestIndividual = population.Aggregate((i1, i2) => CalculateFitness(i1) > CalculateFitness(i2) ? i1 : i2);
+                bestIndividuals[i] = bestIndividual;
+            });
+
+            // Select the best individual from the best individuals
+            string overallBestIndividual = bestIndividuals.Aggregate((i1, i2) => CalculateFitness(i1) > CalculateFitness(i2) ? i1 : i2);
+            Console.WriteLine("Overall best individual: " + overallBestIndividual);
         }
     }
 }
