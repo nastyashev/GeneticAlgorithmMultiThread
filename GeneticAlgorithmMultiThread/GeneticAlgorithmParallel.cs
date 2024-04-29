@@ -16,66 +16,88 @@ namespace GeneticAlgorithmMultiThread
 
         public override void Run(List<string> initialPopulation)
         {
-            // Number of populations to create in parallel
-            int numPopulations = Environment.ProcessorCount;
+            int numPopulations = 10;
 
             int size = initialPopulation.Count / numPopulations;
             int remainder = initialPopulation.Count % numPopulations;
 
-            // Split the initial population into multiple sub-populations
-            List<List<string>> subPopulations = new List<List<string>>();
+            List<List<string>> populations = new List<List<string>>();
+
             for (int i = 0; i < numPopulations; i++)
             {
-                //subPopulations.Add(initialPopulation.Skip(i * initialPopulation.Count / numPopulations).Take(initialPopulation.Count / numPopulations).ToList());
-                int start = i * size;
-                int end = (i == numPopulations - 1) ? start + size + remainder : start + size;
-                subPopulations.Add(initialPopulation.GetRange(start, end - start));
-            }
+                List<string> population = new List<string>();
 
-            // Create and evolve populations in parallel
-            List<string> bestIndividuals = new List<string>(new string[numPopulations]);
-            Parallel.For(0, numPopulations, i =>
-            {
-                List<string> population = subPopulations[i];
-                double maxFitness = CalculateFitness(population[0]);
-
-                while (maxFitness < genomeLength)
+                for (int j = 0; j < size; j++)
                 {
-                    List<string> newPopulation = new List<string>();
-
-                    for (int j = 0; j < populationSize / 2; j++)
-                    {
-                        string parent1 = Selection(population);
-                        string parent2 = Selection(population);
-
-                        (string child1, string child2) = Crossover(parent1, parent2);
-
-                        child1 = Mutation(child1);
-                        child2 = Mutation(child2);
-
-                        newPopulation.Add(child1);
-                        newPopulation.Add(child2);
-                    }
-
-                    population = newPopulation;
-
-                    for (int j = 1; j < populationSize; j++)
-                    {
-                        double fitness = CalculateFitness(population[j]);
-                        if (fitness > maxFitness)
-                        {
-                            maxFitness = fitness;
-                        }
-                    }
+                    population.Add(initialPopulation[i * size + j]);
                 }
 
-                string bestIndividual = population.Aggregate((i1, i2) => CalculateFitness(i1) > CalculateFitness(i2) ? i1 : i2);
-                bestIndividuals[i] = bestIndividual;
-            });
+                populations.Add(population);
+            }
 
-            // Select the best individual from the best individuals
-            string overallBestIndividual = bestIndividuals.Aggregate((i1, i2) => CalculateFitness(i1) > CalculateFitness(i2) ? i1 : i2);
-            Console.WriteLine("Overall best individual: " + overallBestIndividual);
+            if (remainder > 0)
+            {
+                populations[numPopulations - 1].AddRange(initialPopulation.GetRange(numPopulations * size, remainder));
+            }
+
+            ThreadPool.SetMinThreads(numPopulations, numPopulations);
+
+            for (int i = 0; i < numPopulations; i++)
+            {
+                ThreadPool.QueueUserWorkItem(new WaitCallback(RunPopulation), populations[i]);
+            }
+
+            // find the fittest individual
+            double maxFitness = CalculateFitness(populations[0][0]);
+            string fittestIndividual = populations[0][0];
+
+            for (int i = 0; i < numPopulations; i++)
+            {
+                for (int j = 0; j < populations[i].Count; j++)
+                {
+                    double fitness = CalculateFitness(populations[i][j]);
+                    if (fitness > maxFitness)
+                    {
+                        maxFitness = fitness;
+                        fittestIndividual = populations[i][j];
+                    }
+                }
+            }
+
+            Console.WriteLine($"Fittest individual: {fittestIndividual}");
+        }
+
+        private void RunPopulation(object initialPopulation)
+        {
+            List<string> population = (List<string>)initialPopulation;
+            List<string> newPopulation = new List<string>();
+
+            for (int i = 0; i < population.Count; i++)
+            {
+                string parent1 = Selection(population);
+                string parent2 = Selection(population);
+
+                (string child1, string child2) = Crossover(parent1, parent2);
+
+                child1 = Mutation(child1);
+                child2 = Mutation(child2);
+
+                newPopulation.Add(child1);
+                newPopulation.Add(child2);
+            }
+
+            population = newPopulation;
+
+            double maxFitness = CalculateFitness(population[0]);
+
+            for (int i = 1; i < populationSize; i++)
+            {
+                double fitness = CalculateFitness(population[i]);
+                if (fitness > maxFitness)
+                {
+                    maxFitness = fitness;
+                }
+            }
         }
     }
 }
