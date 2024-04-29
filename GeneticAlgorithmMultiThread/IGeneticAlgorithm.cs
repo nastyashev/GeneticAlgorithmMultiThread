@@ -8,6 +8,6 @@ namespace GeneticAlgorithmMultiThread
 {
     internal interface IGeneticAlgorithm
     {
-        void Run(List<string> population);
+        void Run(List<string> population, int generations);
     }
 }

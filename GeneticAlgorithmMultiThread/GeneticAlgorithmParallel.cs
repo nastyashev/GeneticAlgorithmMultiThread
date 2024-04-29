@@ -14,7 +14,7 @@ namespace GeneticAlgorithmMultiThread
         {
         }
 
-        public override void Run(List<string> initialPopulation)
+        public override void Run(List<string> initialPopulation, int generations)
         {
             int numPopulations = 10;
 
@@ -29,7 +29,7 @@ namespace GeneticAlgorithmMultiThread
 
                 for (int j = 0; j < size; j++)
                 {
-                    population.Add(initialPopulation[i * size + j]);
+                    population.Add(initialPopulation[j * size + j]);
                 }
 
                 populations.Add(population);

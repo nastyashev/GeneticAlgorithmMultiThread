@@ -118,21 +118,15 @@ namespace GeneticAlgorithmMultiThread
         }
 
         // Run the genetic algorithm
-        public virtual void Run(List<string> population)
+        public virtual void Run(List<string> population, int generations)
         {
-            // Find the fittest individual in the initial population
-            //string fittest = population[0];
-            double maxFitness = CalculateFitness(population[0]);
-            // counter for the number of generations
-            int generation = 0;
-
             // Run the genetic algorithm until the fittest individual has the maximum fitness
-            while (maxFitness < genomeLength)
+            for (int i = 0; i < generations; i++)
             {
                 List<string> newPopulation = new List<string>();
 
                 // Create a new population by selecting, crossing over, and mutating individuals
-                for (int i = 0; i < populationSize / 2; i++)
+                for (int j = 0; j < populationSize / 2; j++)
                 {
                     string parent1 = Selection(population);
                     string parent2 = Selection(population);
@@ -147,19 +141,20 @@ namespace GeneticAlgorithmMultiThread
                 }
 
                 population = newPopulation;
+            }
 
-                // Find the fittest individual in the new population
-                for (int i = 1; i < populationSize; i++)
+            // Select the fittest individual from the final population
+            string fittest = population[0];
+            double maxFitness = CalculateFitness(fittest);
+
+            for (int i = 1; i < populationSize; i++)
+            {
+                double fitness = CalculateFitness(population[i]);
+                if (fitness > maxFitness)
                 {
-                    double fitness = CalculateFitness(population[i]);
-                    if (fitness > maxFitness)
-                    {
-                        //fittest = population[i];
-                        maxFitness = fitness;
-                    }
+                    fittest = population[i];
+                    maxFitness = fitness;
                 }
-
-                generation++;
             }
 
             /*Console.WriteLine("Generation: " + generation);

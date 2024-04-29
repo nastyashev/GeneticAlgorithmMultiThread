@@ -14,6 +14,7 @@ namespace GeneticAlgorithmMultiThread
             int populationSize = 200;
             double mutationRate = 0.001;
             int genomeLength = 100;
+            int generations = 100;
 
             // Create a new instance of the genetic algorithm
             GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(populationSize, mutationRate, genomeLength);
@@ -24,15 +25,15 @@ namespace GeneticAlgorithmMultiThread
             // Run the genetic algorithm
             //RunAlgorithm(geneticAlgorithm, population);
             // Console.WriteLine("-------------------------------------------------");
-            geneticAlgorithmParallel.Run(population);
+            geneticAlgorithmParallel.Run(population, generations);
         }
 
-        static void RunAlgorithm(IGeneticAlgorithm geneticAlgorithm, List<string> population)
+        static void RunAlgorithm(IGeneticAlgorithm geneticAlgorithm, List<string> population, int generations)
         {
             // warmup
             for (int i = 0; i < 20; i++)
             {
-                geneticAlgorithm.Run(population);
+                geneticAlgorithm.Run(population, generations);
             }
 
             // measure
