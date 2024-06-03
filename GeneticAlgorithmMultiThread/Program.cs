@@ -11,28 +11,40 @@ namespace GeneticAlgorithmMultiThread
         static void Main(string[] args)
         {
             // Define the parameters of the genetic algorithm
-            int populationSize = 10;
             double mutationRate = 0.01;
-            int genomeLength = 20;
+            int tournamentSize = 50;
+            int populationSize = 200;
+            int generations = 100;
+            Random Random = new Random();
+
+            List<City> cities = new List<City>();
+            for (int i = 0; i < 200; i++)
+            {
+                cities.Add(new City(Random.Next(1000), Random.Next(1000), i));
+            }
 
             // Create a new instance of the genetic algorithm
-            GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(populationSize, mutationRate, genomeLength);
-            GeneticAlgorithmParallel geneticAlgorithmParallel = new GeneticAlgorithmParallel(populationSize, mutationRate, genomeLength);
+            GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(mutationRate, tournamentSize);
+            GeneticAlgorithmParallel geneticAlgorithmParallel = new GeneticAlgorithmParallel(mutationRate, tournamentSize);
 
-            var population = geneticAlgorithm.InitializePopulation();
+            Population population1 = new Population(populationSize, cities);
+            Population population2 = population1.Copy();
 
             // Run the genetic algorithm
-            //RunAlgorithm(geneticAlgorithm, population);
+            RunAlgorithm(geneticAlgorithm, population1, generations);
             Console.WriteLine("-------------------------------------------------");
-            geneticAlgorithmParallel.Run(population);
+            RunAlgorithm(geneticAlgorithmParallel, population2, generations);
         }
 
-        static void RunAlgorithm(IGeneticAlgorithm geneticAlgorithm, List<string> population)
+        static void RunAlgorithm(GeneticAlgorithm geneticAlgorithm, Population population, int generations)
         {
             // warmup
             for (int i = 0; i < 20; i++)
             {
-                geneticAlgorithm.Run(population);
+                for (int j = 0; j < generations; j++)
+                {
+                    population = geneticAlgorithm.EvolvePopulation(population);
+                }
             }
 
             // measure
@@ -43,7 +55,10 @@ namespace GeneticAlgorithmMultiThread
             {
                 stopwatch.Start();
 
-                geneticAlgorithm.Run(population);
+                for (int j = 0; j < generations; j++)
+                {
+                    population = geneticAlgorithm.EvolvePopulation(population);
+                }
 
                 stopwatch.Stop();
 
@@ -54,6 +69,10 @@ namespace GeneticAlgorithmMultiThread
             long microseconds = (long)microsecondsList.Average();
 
             Console.WriteLine("Time taken: " + microseconds + " microseconds");
+
+            Console.WriteLine("Final distance: " + population.GetFittest().Distance);
+            Console.WriteLine("Solution:");
+            Console.WriteLine(population.GetFittest());
         }
     }
 }

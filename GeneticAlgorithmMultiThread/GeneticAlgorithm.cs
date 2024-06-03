@@ -7,163 +7,107 @@ using System.Threading.Tasks;
 namespace GeneticAlgorithmMultiThread
 {
     // Sequentual implementation of the genetic algorithm
-    internal class GeneticAlgorithm : IGeneticAlgorithm
+    public class GeneticAlgorithm : IGeneticAlgorithm
     {
-        protected int populationSize;
-        protected double mutationRate;
-        protected int genomeLength;
-        protected Random random;
-
-        public GeneticAlgorithm(int populationSize, double mutationRate, int genomeLength)
+        private readonly Random Random = new Random();
+        private readonly double _mutationRate;
+        private readonly int _tournamentSize;
+        
+        public GeneticAlgorithm(double mutationRate, int tournamentSize)
         {
-            this.populationSize = populationSize;
-            this.mutationRate = mutationRate;
-            this.genomeLength = genomeLength;
-            this.random = new Random();
+            _mutationRate = mutationRate;
+            _tournamentSize = tournamentSize;
         }
 
-        // Initialize population with random genomes
-        public List<string> InitializePopulation()
+        protected Route Crossover(Route parent1, Route parent2)
         {
-            List<string> population = new List<string>();
+            Route child = new Route(parent1.Cities);
+            int startPos = Random.Next(parent1.Cities.Count);
+            int endPos = Random.Next(parent1.Cities.Count);
 
-            for (int i = 0; i < populationSize; i++)
+            for (int i = 0; i < child.Cities.Count; i++)
             {
-                population.Add(GenerateRandomGenome());
-            }
-
-            return population;
-        }
-
-        // Generate a random genome of given length
-        protected string GenerateRandomGenome()
-        {
-            StringBuilder genome = new StringBuilder();
-
-            for (int i = 0; i < genomeLength; i++)
-            {
-                genome.Append(random.Next(2)); // Append 0 or 1
-            }
-
-            return genome.ToString();
-        }
-
-        // Selection process
-        protected string Selection(List<string> population)
-        {
-            int tournamentSize = 5; // Define the tournament size
-            List<string> tournament = new List<string>();
-
-            // Select random individuals for the tournament
-            for (int i = 0; i < tournamentSize; i++)
-            {
-                int randomId = random.Next(population.Count);
-                tournament.Add(population[randomId]);
-            }
-
-            // Select the fittest individual
-            string fittest = tournament[0];
-            double maxFitness = CalculateFitness(fittest);
-
-            for (int i = 1; i < tournamentSize; i++)
-            {
-                double fitness = CalculateFitness(tournament[i]);
-                if (fitness > maxFitness)
+                if (startPos < endPos && i > startPos && i < endPos)
                 {
-                    fittest = tournament[i];
-                    maxFitness = fitness;
+                    child.Cities[i] = parent1.Cities[i];
                 }
-            }
-
-            return fittest;
-        }
-
-        // Crossover process
-        protected (string, string) Crossover(string parent1, string parent2)
-        {
-            // Choose a random crossover point
-            int crossoverPoint = random.Next(genomeLength);
-
-            // Swap bits after the crossover point
-            string child1 = parent1.Substring(0, crossoverPoint) + parent2.Substring(crossoverPoint);
-            string child2 = parent2.Substring(0, crossoverPoint) + parent1.Substring(crossoverPoint);
-
-            return (child1, child2);
-        }
-
-        // Mutation process
-        protected string Mutation(string genome)
-        {
-            StringBuilder mutatedGenome = new StringBuilder(genome);
-
-            for (int i = 0; i < genomeLength; i++)
-            {
-                // Flip the bit with a probability equal to the mutation rate
-                if (random.NextDouble() < mutationRate)
+                else if (startPos > endPos)
                 {
-                    mutatedGenome[i] = genome[i] == '0' ? '1' : '0';
-                }
-            }
-
-            return mutatedGenome.ToString();
-        }
-
-        // Fitness calculation
-        protected double CalculateFitness(string genome)
-        {
-            // Count the number of 1s in the genome
-            int count = genome.Count(c => c == '1');
-
-            return count;
-        }
-
-        // Run the genetic algorithm
-        public virtual void Run(List<string> population)
-        {
-            // Find the fittest individual in the initial population
-            //string fittest = population[0];
-            double maxFitness = CalculateFitness(population[0]);
-            // counter for the number of generations
-            int generation = 0;
-
-            // Run the genetic algorithm until the fittest individual has the maximum fitness
-            while (maxFitness < genomeLength)
-            {
-                List<string> newPopulation = new List<string>();
-
-                // Create a new population by selecting, crossing over, and mutating individuals
-                for (int i = 0; i < populationSize / 2; i++)
-                {
-                    string parent1 = Selection(population);
-                    string parent2 = Selection(population);
-
-                    (string child1, string child2) = Crossover(parent1, parent2);
-
-                    child1 = Mutation(child1);
-                    child2 = Mutation(child2);
-
-                    newPopulation.Add(child1);
-                    newPopulation.Add(child2);
-                }
-
-                population = newPopulation;
-
-                // Find the fittest individual in the new population
-                for (int i = 1; i < populationSize; i++)
-                {
-                    double fitness = CalculateFitness(population[i]);
-                    if (fitness > maxFitness)
+                    if (!(i < startPos && i > endPos))
                     {
-                        //fittest = population[i];
-                        maxFitness = fitness;
+                        child.Cities[i] = parent1.Cities[i];
                     }
                 }
-
-                generation++;
             }
 
-            /*Console.WriteLine("Generation: " + generation);
-            Console.WriteLine("Fittest genome: " + fittest);*/
+            for (int i = 0; i < parent2.Cities.Count; i++)
+            {
+                if (!child.Cities.Contains(parent2.Cities[i]))
+                {
+                    for (int j = 0; j < child.Cities.Count; j++)
+                    {
+                        if (child.Cities[j] == null)
+                        {
+                            child.Cities[j] = parent2.Cities[i];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return child;
+        }
+
+        protected void Mutate(Route route)
+        {
+            for (int routePos1 = 0; routePos1 < route.Cities.Count; routePos1++)
+            {
+                if (Random.NextDouble() < _mutationRate)
+                {
+                    int routePos2 = Random.Next(route.Cities.Count);
+
+                    City city1 = route.Cities[routePos1];
+                    City city2 = route.Cities[routePos2];
+
+                    route.Cities[routePos2] = city1;
+                    route.Cities[routePos1] = city2;
+                }
+            }
+        }
+
+        protected Route TournamentSelection(Population population)
+        {
+            Population tournament = new Population(_tournamentSize, population.GetCities());
+            for (int i = 0; i < _tournamentSize; i++)
+            {
+                Route tournamentRoute = population.Routes[Random.Next(population.Routes.Count)];
+                tournament.Routes.Add(tournamentRoute);
+            }
+
+            return tournament.GetFittest();
+        }
+
+        public virtual Population EvolvePopulation(Population population)
+        {
+            Population newPopulation = new Population(population.Routes.Count, population.GetCities());
+            int elitismOffset = 0;
+            if (elitismOffset > 0)
+            {
+                newPopulation.Routes[0] = population.GetFittest();
+                elitismOffset++;
+            }
+
+            for (int i = elitismOffset; i < newPopulation.Routes.Count; i++)
+            {
+                Route parent1 = TournamentSelection(population);
+                Route parent2 = TournamentSelection(population);
+                Route child = Crossover(parent1, parent2);
+                Mutate(child);
+                newPopulation.Routes[i] = child;
+            }
+
+            newPopulation.Sort();
+            return newPopulation;
         }
     }
 }

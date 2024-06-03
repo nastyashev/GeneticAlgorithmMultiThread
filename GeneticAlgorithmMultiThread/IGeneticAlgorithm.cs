@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace GeneticAlgorithmMultiThread
 {
-    internal interface IGeneticAlgorithm
+    public interface IGeneticAlgorithm
     {
-        void Run(List<string> population);
+        Population EvolvePopulation(Population population);
     }
 }
