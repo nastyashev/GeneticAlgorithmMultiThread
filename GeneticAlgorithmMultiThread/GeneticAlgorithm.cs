@@ -9,10 +9,10 @@ namespace GeneticAlgorithmMultiThread
     // Sequentual implementation of the genetic algorithm
     public class GeneticAlgorithm : IGeneticAlgorithm
     {
-        private readonly Random Random = new Random();
+        protected readonly Random Random = new Random();
         private readonly double _mutationRate;
         private readonly int _tournamentSize;
-        
+
         public GeneticAlgorithm(double mutationRate, int tournamentSize)
         {
             _mutationRate = mutationRate;
@@ -90,14 +90,10 @@ namespace GeneticAlgorithmMultiThread
         public virtual Population EvolvePopulation(Population population)
         {
             Population newPopulation = new Population(population.Routes.Count, population.GetCities());
-            int elitismOffset = 0;
-            if (elitismOffset > 0)
-            {
-                newPopulation.Routes[0] = population.GetFittest();
-                elitismOffset++;
-            }
 
-            for (int i = elitismOffset; i < newPopulation.Routes.Count; i++)
+            newPopulation.Routes[0] = population.Routes.FirstOrDefault();
+
+            for (int i = 1; i < newPopulation.Routes.Count; i++)
             {
                 Route parent1 = TournamentSelection(population);
                 Route parent2 = TournamentSelection(population);

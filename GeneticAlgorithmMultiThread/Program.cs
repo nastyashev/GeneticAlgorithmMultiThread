@@ -12,9 +12,9 @@ namespace GeneticAlgorithmMultiThread
         {
             // Define the parameters of the genetic algorithm
             double mutationRate = 0.01;
-            int tournamentSize = 50;
-            int populationSize = 200;
-            int generations = 100;
+            int tournamentSize = 5;
+            int populationSize = 100;
+            int generations = 10;
             Random Random = new Random();
 
             List<City> cities = new List<City>();
@@ -48,7 +48,7 @@ namespace GeneticAlgorithmMultiThread
             }
 
             // measure
-            List<long> microsecondsList = new List<long>();
+            List<long> milisecondsList = new List<long>();
             Stopwatch stopwatch = new Stopwatch();
 
             for (int i = 0; i < 20; i++)
@@ -62,11 +62,11 @@ namespace GeneticAlgorithmMultiThread
 
                 stopwatch.Stop();
 
-                long microsecondsTmp = stopwatch.ElapsedTicks / (Stopwatch.Frequency / (1000L * 1000L));
-                microsecondsList.Add(microsecondsTmp);
+                long milliseconds = stopwatch.ElapsedMilliseconds;
+                milisecondsList.Add(milliseconds);
             }
 
-            long microseconds = (long)microsecondsList.Average();
+            long microseconds = (long)milisecondsList.Average();
 
             Console.WriteLine("Time taken: " + microseconds + " microseconds");
 

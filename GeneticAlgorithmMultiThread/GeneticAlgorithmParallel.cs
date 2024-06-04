@@ -17,14 +17,10 @@ namespace GeneticAlgorithmMultiThread
         public override Population EvolvePopulation(Population population)
         {
             Population newPopulation = new Population(population.Routes.Count, population.GetCities());
-            int elitismOffset = 0;
-            if (elitismOffset > 0)
-            {
-                newPopulation.Routes[0] = population.GetFittest();
-                elitismOffset++;
-            }
 
-            Parallel.For(elitismOffset, population.Routes.Count, i =>
+            newPopulation.Routes[0] = population.Routes.FirstOrDefault();
+
+            Parallel.For(1, population.Routes.Count, i =>
             {
                 Route parent1 = TournamentSelection(population);
                 Route parent2 = TournamentSelection(population);
