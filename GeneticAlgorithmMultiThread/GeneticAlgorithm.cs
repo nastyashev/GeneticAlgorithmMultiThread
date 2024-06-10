@@ -65,12 +65,9 @@ namespace GeneticAlgorithmMultiThread
                 if (Random.NextDouble() < _mutationRate)
                 {
                     int routePos2 = Random.Next(route.Cities.Count);
-
-                    City city1 = route.Cities[routePos1];
-                    City city2 = route.Cities[routePos2];
-
-                    route.Cities[routePos2] = city1;
-                    route.Cities[routePos1] = city2;
+                    City temp = route.Cities[routePos1];
+                    route.Cities[routePos1] = route.Cities[routePos2];
+                    route.Cities[routePos2] = temp;
                 }
             }
         }

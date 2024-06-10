@@ -20,12 +20,11 @@ namespace GeneticAlgorithmMultiThread
         public double CalculateDistance()
         {
             double distance = 0;
-            for (int i = 0; i < Cities.Count; i++)
+            for (int i = 0; i < Cities.Count - 1; i++)
             {
-                City fromCity = Cities[i];
-                City toCity = i + 1 < Cities.Count ? Cities[i + 1] : Cities[0];
-                distance += fromCity.DistanceTo(toCity);
+                distance += Cities[i].DistanceTo(Cities[i + 1]);
             }
+            distance += Cities[Cities.Count - 1].DistanceTo(Cities[0]);
 
             return distance;
         }
@@ -38,7 +37,7 @@ namespace GeneticAlgorithmMultiThread
             {
                 sb.Append(city.Index + " ");
             }
-            sb.Append("Distance: " + Distance);
+            sb.Append("\nDistance: " + Distance);
 
             return sb.ToString();
         }
