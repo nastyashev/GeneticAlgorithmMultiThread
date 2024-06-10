@@ -85,10 +85,13 @@ namespace GeneticAlgorithmMultiThread
 
             Console.WriteLine("Solution:");
             Console.WriteLine(population.GetFittest());
-            Console.WriteLine("Cities:");
-            foreach (City city in population.GetFittest().Cities)
+            if (population.GetFittest().Cities.Count <= 10)
             {
-                Console.WriteLine(city);
+                Console.WriteLine("Cities:");
+                foreach (City city in population.GetFittest().Cities)
+                {
+                    Console.WriteLine(city);
+                }
             }
         }
     }
