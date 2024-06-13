@@ -55,14 +55,14 @@ namespace GeneticAlgorithmMultiThread
             {
                 for (int j = 0; j < generations; j++)
                 {
-                    populationTmp = geneticAlgorithm.EvolvePopulation(populationTmp);
+                    populationTmp = geneticAlgorithm.EvolvePopulation(population);
                 }
-                populationTmp = population.Copy();
             }
 
             // measure
             List<long> milisecondsList = new List<long>();
             Stopwatch stopwatch = new Stopwatch();
+            populationTmp = population.Copy();
 
             for (int i = 0; i < 20; i++)
             {
@@ -70,18 +70,20 @@ namespace GeneticAlgorithmMultiThread
 
                 for (int j = 0; j < generations; j++)
                 {
-                    populationTmp = geneticAlgorithm.EvolvePopulation(populationTmp);
+                    populationTmp = geneticAlgorithm.EvolvePopulation(population);
                 }
 
                 stopwatch.Stop();
                 long milliseconds = stopwatch.ElapsedMilliseconds;
                 milisecondsList.Add(milliseconds);
+
+                stopwatch.Reset();
             }
             population = populationTmp.Copy();
 
             long miliseconds = (long)milisecondsList.Average();
 
-            Console.WriteLine("Time taken: " + miliseconds + " miliseconds");
+            Console.WriteLine("Time taken: " + miliseconds + " milliseconds");
 
             Console.WriteLine("Solution:");
             Console.WriteLine(population.GetFittest());
